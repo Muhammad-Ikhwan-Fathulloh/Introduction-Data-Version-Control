@@ -1,0 +1,71 @@
+stages: [setup, repro, push]
+
+image: docker.io/iterativeai/cml:0-dvc2-base1
+
+services:
+  - name: docker.io/minio/minio:latest
+    alias: minio
+    command: ["server", "/data", "--console-address", ":9001"]
+
+variables:
+  GIT_DEPTH: "0"
+  DVC_REMOTE: "minio"
+
+cache:
+  key: dvc-cache
+  paths:
+    - .dvc/cache/
+  policy: pull-push
+
+before_script:
+  - python --version
+  - dvc --version
+  # Tambah remote S3 sekali (aman kalau idempotent)
+  - dvc remote add -d "$DVC_REMOTE" s3://dvcstore/project || true
+  - dvc remote modify "$DVC_REMOTE" endpointurl "$DVC_S3_ENDPOINT"
+  - dvc remote modify "$DVC_REMOTE" use_ssl false
+
+setup:
+  stage: setup
+  script:
+    - pip install --quiet minio
+    - python - <<'PY'
+from minio import Minio
+import os, time
+host = os.environ.get("DVC_S3_ENDPOINT","http://minio:9000").replace("http://","").replace("https://","")
+client = Minio(host, access_key=os.environ["AWS_ACCESS_KEY_ID"],
+               secret_key=os.environ["AWS_SECRET_ACCESS_KEY"], secure=False)
+# tunggu service ready
+for _ in range(40):
+    try:
+        client.list_buckets(); break
+    except Exception: time.sleep(2)
+if not client.bucket_exists("dvcstore"):
+    client.make_bucket("dvcstore")
+print("Bucket dvcstore OK.")
+PY
+  artifacts:
+    paths: [ .dvc/config ]
+    expire_in: 1 week
+
+repro:
+  stage: repro
+  needs: [setup]
+  script:
+    - python -m pip install -r requirements.txt
+    - dvc repro -v
+    - dvc metrics show
+  artifacts:
+    paths:
+      - metrics/score.json
+      - models/
+      - .dvc/cache/
+    expire_in: 1 week
+
+push:
+  stage: push
+  needs: [repro]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  script:
+    - dvc push -v

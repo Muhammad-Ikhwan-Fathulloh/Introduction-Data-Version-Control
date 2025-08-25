@@ -1,0 +1,30 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+    - path: src/prepare.py
+      md5: e61da2b5b1b86be96eb09c9334f19e57
+      size: 372
+    outs:
+    - path: data/raw
+      md5: 2523a92c661e02dbf0b98af73de3d340.dir
+      size: 738
+      nfiles: 1
+  train:
+    cmd: python src/train.py
+    deps:
+    - path: data/raw
+      md5: 2523a92c661e02dbf0b98af73de3d340.dir
+      size: 738
+      nfiles: 1
+    - path: src/train.py
+      md5: e6135bbcd1cbf504fef74e2451369d96
+      size: 792
+    outs:
+    - path: metrics/score.json
+      md5: 2a463c5f2a6e3d24fbfcc5e2852437f5
+      size: 28
+    - path: models/model.txt
+      md5: f155351909d1057adee067d4afad99a5
+      size: 28

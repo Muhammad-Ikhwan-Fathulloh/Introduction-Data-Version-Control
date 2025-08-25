@@ -1,0 +1,18 @@
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+      - src/prepare.py
+    outs:
+      - data/raw  # akan di-cache oleh DVC
+
+  train:
+    cmd: python src/train.py
+    deps:
+      - src/train.py
+      - data/raw
+    outs:
+      - models/model.txt
+    metrics:
+      - metrics/score.json:
+          cache: false

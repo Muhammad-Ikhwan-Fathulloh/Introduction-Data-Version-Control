@@ -1,0 +1,3 @@
+function dvc { docker run --rm -it -v "${PWD}:/work" -w /work `
+  -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e DVC_S3_ENDPOINT `
+  docker.io/iterativeai/cml:0-dvc2-base1 dvc $args }

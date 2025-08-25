@@ -1,0 +1,18 @@
+dvc init
+dvc remote add -d minio s3://dvcstore/project
+dvc remote modify --local minio endpointurl http://host.docker.internal:9000
+dvc remote modify minio use_ssl false
+dvc remote modify --local minio access_key_id minioadmin
+dvc remote modify --local minio secret_access_key minioadmin
+
+# bikin artefak supaya ada yang dipush
+mkdir -p data/raw
+echo "hello dvc" > data/raw/hello.txt
+dvc add data/raw
+git add data/raw.dvc .gitignore
+git commit -m "track sample data"
+
+# (opsional) kalau ada dvc.yaml:
+# dvc repro
+
+dvc push -v
