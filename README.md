@@ -486,7 +486,7 @@ echo "hello dvc" > data/raw/hello.txt
 dvc add data/raw
 git add data/raw.dvc .gitignore
 git commit -m "track data v1"
-dvc push
+dvc push -v
 git push origin main
 ```
 
@@ -497,7 +497,7 @@ dvc repro
 dvc metrics show
 git add dvc.lock metrics/score.json
 git commit -m "update metrics"
-dvc push
+dvc push -v
 git push origin main
 ```
 
@@ -537,6 +537,10 @@ docker run --rm --network host docker.io/minio/mc:latest \
 docker run --rm docker.io/minio/mc:latest \
   sh -c "mc alias set local http://host.docker.internal:9000 minioadmin minioadmin && mc ls local && mc ls local/dvcstore"
 ```
+
+![Data Version Control push to Minio](screenshot/dvcstore.png "Data Version Control push to Minio")
+
+![Data Version Control push to Minio Detail](screenshot/dvcstore_detail.png "Data Version Control push to Minio Detail")
 
 ## Catatan Keamanan
 
