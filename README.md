@@ -80,6 +80,8 @@ volumes:
 
 Jalankan: `docker compose up -d`. Console MinIO: `http://localhost:9001`.
 
+![Run Minio dengan Docker](screenshot/minio_docker.png "Run Minio dengan Docker")
+
 ## Menyiapkan Proyek DVC
 
 ```bash
